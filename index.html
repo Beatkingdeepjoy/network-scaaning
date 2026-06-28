@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetSentry — Network Scanner Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="scanline-overlay" aria-hidden="true"></div>
+
+<div class="app">
+
+  <!-- ================= TOP BAR ================= -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+        <circle cx="16" cy="16" r="8" stroke="currentColor" stroke-width="1.5" opacity="0.7"/>
+        <circle cx="16" cy="16" r="2.5" fill="currentColor"/>
+      </svg>
+      <div class="brand-text">
+        <span class="brand-name">NetSentry</span>
+        <span class="brand-sub">Scanner Console</span>
+      </div>
+    </div>
+
+    <div class="topbar-status" id="engineStatus">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">checking engine&hellip;</span>
+    </div>
+  </header>
+
+  <!-- ================= MAIN LAYOUT ================= -->
+  <main class="layout">
+
+    <!-- LEFT: control panel -->
+    <section class="panel control-panel">
+      <h2 class="panel-title"><span class="eyebrow">01</span> Target Range</h2>
+
+      <label class="field-label" for="subnetInput">CIDR subnet</label>
+      <input
+        id="subnetInput"
+        class="field-input"
+        type="text"
+        placeholder="192.168.1.0/24"
+        value="192.168.1.0/24"
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <p class="field-hint">Max /22 (1024 hosts). Only scan networks you own or have written permission to test.</p>
+
+      <button class="btn-scan" id="scanBtn">
+        <span class="btn-scan-label">Run scan</span>
+        <span class="btn-scan-spinner" aria-hidden="true"></span>
+      </button>
+
+      <div class="divider"></div>
+
+      <h2 class="panel-title"><span class="eyebrow">02</span> Recent Scans</h2>
+      <ul class="history-list" id="historyList">
+        <li class="history-empty">No scans yet this session</li>
+      </ul>
+    </section>
+
+    <!-- CENTER: radar + live feed -->
+    <section class="panel radar-panel">
+      <div class="radar-wrap">
+        <svg class="radar-svg" id="radarSvg" viewBox="0 0 400 400">
+          <defs>
+            <radialGradient id="sweepGradient" cx="0%" cy="0%" r="100%">
+              <stop offset="0%" stop-color="#00d9a3" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#00d9a3" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <!-- range rings -->
+          <circle cx="200" cy="200" r="40" class="radar-ring"/>
+          <circle cx="200" cy="200" r="90" class="radar-ring"/>
+          <circle cx="200" cy="200" r="140" class="radar-ring"/>
+          <circle cx="200" cy="200" r="190" class="radar-ring radar-ring-outer"/>
+
+          <!-- crosshairs -->
+          <line x1="200" y1="10" x2="200" y2="390" class="radar-axis"/>
+          <line x1="10" y1="200" x2="390" y2="200" class="radar-axis"/>
+
+          <!-- sweep -->
+          <g id="sweepGroup" class="sweep-group">
+            <path d="M200,200 L200,10 A190,190 0 0,1 343.5,90.5 Z" fill="url(#sweepGradient)"/>
+          </g>
+
+          <!-- host blips render here dynamically -->
+          <g id="blipLayer"></g>
+        </svg>
+
+        <div class="radar-center-readout" id="radarReadout">
+          <span class="readout-value" id="liveHostCount">0</span>
+          <span class="readout-label">hosts found</span>
+        </div>
+      </div>
+
+      <div class="feed">
+        <h2 class="panel-title feed-title"><span class="eyebrow">03</span> Live Feed</h2>
+        <div class="feed-log" id="feedLog">
+          <div class="feed-line feed-line-idle">&gt; awaiting scan command&hellip;</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: results -->
+    <section class="panel results-panel">
+      <div class="results-header">
+        <h2 class="panel-title"><span class="eyebrow">04</span> Discovered Hosts</h2>
+        <span class="results-meta" id="resultsMeta"></span>
+      </div>
+
+      <div class="results-grid" id="resultsGrid">
+        <div class="empty-state">
+          <svg viewBox="0 0 48 48" class="empty-icon" fill="none">
+            <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+            <circle cx="24" cy="24" r="3" fill="currentColor" opacity="0.5"/>
+          </svg>
+          <p>No hosts discovered yet.<br>Set a subnet and run a scan to populate this view.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= HOST DETAIL DRAWER ================= -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer">
+    <button class="drawer-close" id="drawerClose" aria-label="Close details">&times;</button>
+    <div id="drawerContent"></div>
+  </aside>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
